@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct SpeechifyCloneApp: App {
+    @StateObject var playbackEngine = PlaybackEngine()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
+        .environmentObject(playbackEngine)
     }
 }
