@@ -10,31 +10,58 @@ import SwiftUI
 struct LibraryView: View {
     @StateObject var libraryViewModel: LibraryViewModel = LibraryViewModel()
     @EnvironmentObject var playbackEngine: PlaybackEngine
-    @State var searchText = ""
     
     var body: some View {
         NavigationStack{
             List{
-                ForEach(libraryViewModel.textItems){ textItem in
+                ForEach(libraryViewModel.filteredTextItems){ textItem in
                     HStack{
                         Text(textItem.title)
-                        Image((playbackEngine.state == .playing(id: textItem.id)) ? "speechify" : "")
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                            .animation(.spring)
+                        if playbackEngine.state == .playing(id: textItem.id) {
+                            Image("speechify")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                        }
                         Spacer()
-                        Text(textItem.text.dropLast(textItem.text.count - 20) + "...")
-                            .font(.footnote)
+                        VStack{
+                            Text(textItem.text.dropLast(textItem.text.count - 20) + "...")
+                                .font(.footnote)
+                            Text(textItem.timeStamp, style: .date)
+                                .font(.footnote)
+                                .foregroundStyle(.gray)
+                        }
                     }
+                    .frame(height: 30)
                     .onTapGesture{
-                        Task{
+                        Task {
                             await playbackEngine.play(textItem: textItem)
                         }
                     }
                 }
                 .onDelete(perform: libraryViewModel.deleteTextItem)
             }
-            .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "Search")
+            .sheet(isPresented: $libraryViewModel.showAddItemSheet) {
+                AddItemView{ title, content in
+                    libraryViewModel.addTextItem(title: title, content: content)
+                }
+            }
+            .searchable(text: $libraryViewModel.search, placement: .navigationBarDrawer, prompt: "Search")
+            .toolbar{
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        libraryViewModel.sortByNewest.toggle()
+                     } label: {
+                         Image(systemName: "arrow.up.arrow.down")
+                     }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        libraryViewModel.showAddItemSheet = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
         }
     }
 }
@@ -42,6 +69,6 @@ struct LibraryView: View {
 #Preview {
     NavigationStack{
         LibraryView()
+            .environmentObject(PlaybackEngine())
     }
-    .environmentObject(PlaybackEngine())
 }
