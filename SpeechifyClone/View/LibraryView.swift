@@ -13,7 +13,7 @@ struct LibraryView: View {
     
     var body: some View {
         NavigationStack{
-            List{
+            List{ // break this up later
                 ForEach(libraryViewModel.filteredTextItems){ textItem in
                     HStack{
                         Text(textItem.title)
