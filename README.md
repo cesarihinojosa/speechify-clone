@@ -8,6 +8,6 @@ Built as a learning project to explore iOS development, and modern SwiftUI desig
 - SwiftUI  
 - AVFoundation  
 
-# Requirments
+## Requirements
 - Looks like speechify
 - Text to audio works from text box
